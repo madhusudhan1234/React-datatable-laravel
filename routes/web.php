@@ -15,5 +15,3 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-$this->get('users/data-table', 'UsersController@getUsersForDataTable')->name('users.table');
-

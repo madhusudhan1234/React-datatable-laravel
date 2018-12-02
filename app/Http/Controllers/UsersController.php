@@ -29,13 +29,11 @@ class UsersController extends Controller
     }
 
     /**
-     * Get users for the data table.
-     *
-     * @param Request $request
+     * List of users in Json format
      *
      * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
-    public function getUsersForDataTable(Request $request)
+    public function index()
     {
         $users = $this->user->all();
 
