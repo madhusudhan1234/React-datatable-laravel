@@ -36206,7 +36206,6 @@ var DataTable = function (_Component) {
       var _this2 = this;
 
       var fetchUrl = '/api/users/?page=' + page + '&column=' + this.state.sorted_column + '&order=' + this.state.order + '&per_page=' + this.state.meta.per_page;
-      console.log(fetchUrl);
       fetch(fetchUrl).then(function (response) {
         return response.json();
       }).then(function (data) {

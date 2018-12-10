@@ -25,7 +25,6 @@ export default class DataTable extends Component {
 
   fetchUsers(page) {
     let fetchUrl = `/api/users/?page=${page}&column=${this.state.sorted_column}&order=${this.state.order}&per_page=${this.state.meta.per_page}`;
-    console.log(fetchUrl);
     fetch(fetchUrl)
       .then(response => {
         return response.json();
