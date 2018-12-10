@@ -36,7 +36,7 @@ class UsersController extends Controller
      */
     public function index(Request $request)
     {
-        $query = $this->user->orderBy($request->column ?? 'name', $request->order);
+        $query = $this->user->orderBy($request->column, $request->order);
         $users = $query->paginate($request->per_page ?? 5);
 
         return UsersResource::collection($users);

@@ -15,16 +15,17 @@ export default class DataTable extends Component {
         to: 1,
         total: 1,
       },
+      first_page: 1,
       current_page: 1,
       sorted_column: 'name',
       offset: 4,
       order: 'asc',
-      columns: ['Id', 'name', 'email', 'address', 'created_at'],
+      columns: ['id', 'name', 'email', 'address', 'created_at'],
     }
   }
 
-  fetchUsers(page) {
-    let fetchUrl = `/api/users/?page=${page}&column=${this.state.sorted_column}&order=${this.state.order}&per_page=${this.state.meta.per_page}`;
+  fetchUsers() {
+    let fetchUrl = `/api/users/?page=${this.state.current_page}&column=${this.state.sorted_column}&order=${this.state.order}&per_page=${this.state.meta.per_page}`;
     fetch(fetchUrl)
       .then(response => {
         return response.json();
@@ -36,7 +37,7 @@ export default class DataTable extends Component {
   }
 
   changePage(pageNumber) {
-    this.fetchUsers(pageNumber);
+    this.setState({ current_page: pageNumber }, () => {this.fetchUsers()});
   }
 
   pagesNumbers() {
@@ -59,7 +60,7 @@ export default class DataTable extends Component {
   }
 
   componentDidMount() {
-    this.fetchUsers(this.state.meta.current_page);
+    this.setState({ current_page: this.state.meta.current_page }, () => {this.fetchUsers()});
   }
 
   tableHeads() {
@@ -91,11 +92,10 @@ export default class DataTable extends Component {
 
   sortByColumn(column) {
     if (column === this.state.sorted_column) {
-      this.state.order = (this.state.order === 'asc') ? 'desc' : 'asc'
+      this.state.order === 'asc' ? this.setState({ order: 'desc', current_page: this.state.first_page }, () => {this.fetchUsers()}) : this.setState({ order: 'asc' }, () => {this.fetchUsers()});
     } else {
-      this.setState({ sorted_column: column, order: 'asc' });
+      this.setState({ sorted_column: column, order: 'asc', current_page: this.state.first_page }, () => {this.fetchUsers()});
     }
-    this.fetchUsers(1);
   }
 
   pageList() {
@@ -111,13 +111,9 @@ export default class DataTable extends Component {
       <div className="data-table">
         <table className="table table-bordered">
           <thead>
-            <tr>
-              { this.tableHeads() }
-            </tr>
+            <tr>{ this.tableHeads() }</tr>
           </thead>
-          <tbody>
-            { this.userList() }
-          </tbody>
+          <tbody>{ this.userList() }</tbody>
         </table>
         { (this.state.users && this.state.users.length > 0) &&
           <nav>

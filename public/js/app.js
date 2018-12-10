@@ -36191,21 +36191,22 @@ var DataTable = function (_Component) {
         to: 1,
         total: 1
       },
+      first_page: 1,
       current_page: 1,
       sorted_column: 'name',
       offset: 4,
       order: 'asc',
-      columns: ['Id', 'name', 'email', 'address', 'created_at']
+      columns: ['id', 'name', 'email', 'address', 'created_at']
     };
     return _this;
   }
 
   _createClass(DataTable, [{
     key: 'fetchUsers',
-    value: function fetchUsers(page) {
+    value: function fetchUsers() {
       var _this2 = this;
 
-      var fetchUrl = '/api/users/?page=' + page + '&column=' + this.state.sorted_column + '&order=' + this.state.order + '&per_page=' + this.state.meta.per_page;
+      var fetchUrl = '/api/users/?page=' + this.state.current_page + '&column=' + this.state.sorted_column + '&order=' + this.state.order + '&per_page=' + this.state.meta.per_page;
       fetch(fetchUrl).then(function (response) {
         return response.json();
       }).then(function (data) {
@@ -36216,7 +36217,11 @@ var DataTable = function (_Component) {
   }, {
     key: 'changePage',
     value: function changePage(pageNumber) {
-      this.fetchUsers(pageNumber);
+      var _this3 = this;
+
+      this.setState({ current_page: pageNumber }, function () {
+        _this3.fetchUsers();
+      });
     }
   }, {
     key: 'pagesNumbers',
@@ -36241,12 +36246,16 @@ var DataTable = function (_Component) {
   }, {
     key: 'componentDidMount',
     value: function componentDidMount() {
-      this.fetchUsers(this.state.meta.current_page);
+      var _this4 = this;
+
+      this.setState({ current_page: this.state.meta.current_page }, function () {
+        _this4.fetchUsers();
+      });
     }
   }, {
     key: 'tableHeads',
     value: function tableHeads() {
-      var _this3 = this;
+      var _this5 = this;
 
       var icon = void 0;
       if (this.state.order === 'asc') {
@@ -36258,10 +36267,10 @@ var DataTable = function (_Component) {
         return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
           'th',
           { className: 'table-head', key: column, onClick: function onClick() {
-              return _this3.sortByColumn(column);
+              return _this5.sortByColumn(column);
             } },
           column,
-          column === _this3.state.sorted_column && icon
+          column === _this5.state.sorted_column && icon
         );
       });
     }
@@ -36303,17 +36312,24 @@ var DataTable = function (_Component) {
   }, {
     key: 'sortByColumn',
     value: function sortByColumn(column) {
+      var _this6 = this;
+
       if (column === this.state.sorted_column) {
-        this.state.order = this.state.order === 'asc' ? 'desc' : 'asc';
+        this.state.order === 'asc' ? this.setState({ order: 'desc', current_page: this.state.first_page }, function () {
+          _this6.fetchUsers();
+        }) : this.setState({ order: 'asc' }, function () {
+          _this6.fetchUsers();
+        });
       } else {
-        this.setState({ sorted_column: column, order: 'asc' });
+        this.setState({ sorted_column: column, order: 'asc', current_page: this.state.first_page }, function () {
+          _this6.fetchUsers();
+        });
       }
-      this.fetchUsers(1);
     }
   }, {
     key: 'pageList',
     value: function pageList() {
-      var _this4 = this;
+      var _this7 = this;
 
       return this.pagesNumbers().map(function (page) {
         return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
@@ -36322,7 +36338,7 @@ var DataTable = function (_Component) {
           __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
             'button',
             { className: 'page-link', onClick: function onClick() {
-                return _this4.changePage(page);
+                return _this7.changePage(page);
               } },
             page
           )
@@ -36332,7 +36348,7 @@ var DataTable = function (_Component) {
   }, {
     key: 'render',
     value: function render() {
-      var _this5 = this;
+      var _this8 = this;
 
       return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
         'div',
@@ -36369,7 +36385,7 @@ var DataTable = function (_Component) {
                 { className: 'page-link',
                   disabled: 1 === this.state.meta.current_page,
                   onClick: function onClick() {
-                    return _this5.changePage(_this5.state.meta.current_page - 1);
+                    return _this8.changePage(_this8.state.meta.current_page - 1);
                   }
                 },
                 'Previous'
@@ -36384,7 +36400,7 @@ var DataTable = function (_Component) {
                 { className: 'page-link',
                   disabled: this.state.meta.last_page === this.state.meta.current_page,
                   onClick: function onClick() {
-                    return _this5.changePage(_this5.state.meta.current_page + 1);
+                    return _this8.changePage(_this8.state.meta.current_page + 1);
                   }
                 },
                 'Next'
