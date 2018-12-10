@@ -36182,20 +36182,88 @@ var DataTable = function (_Component) {
     var _this = _possibleConstructorReturn(this, (DataTable.__proto__ || Object.getPrototypeOf(DataTable)).call(this, props));
 
     _this.state = {
-      users: []
+      users: [],
+      meta: {
+        current_page: 1,
+        from: 1,
+        last_page: 1,
+        per_page: 5,
+        to: 1,
+        total: 1
+      },
+      current_page: 1,
+      sorted_column: 'name',
+      offset: 4,
+      order: 'asc',
+      columns: ['Id', 'name', 'email', 'address', 'created_at']
     };
     return _this;
   }
 
   _createClass(DataTable, [{
-    key: 'componentDidMount',
-    value: function componentDidMount() {
+    key: 'fetchUsers',
+    value: function fetchUsers(page) {
       var _this2 = this;
 
-      fetch('/api/users').then(function (response) {
+      var fetchUrl = '/api/users/?page=' + page + '&column=' + this.state.sorted_column + '&order=' + this.state.order + '&per_page=' + this.state.meta.per_page;
+      console.log(fetchUrl);
+      fetch(fetchUrl).then(function (response) {
         return response.json();
       }).then(function (data) {
         _this2.setState({ users: data.data });
+        _this2.setState({ meta: data.meta });
+      });
+    }
+  }, {
+    key: 'changePage',
+    value: function changePage(pageNumber) {
+      this.fetchUsers(pageNumber);
+    }
+  }, {
+    key: 'pagesNumbers',
+    value: function pagesNumbers() {
+      if (!this.state.meta.to) {
+        return [];
+      }
+      var from = this.state.meta.current_page - this.state.offset;
+      if (from < 1) {
+        from = 1;
+      }
+      var to = from + this.state.offset * 2;
+      if (to >= this.state.meta.last_page) {
+        to = this.state.meta.last_page;
+      }
+      var pagesArray = [];
+      for (var page = from; page <= to; page++) {
+        pagesArray.push(page);
+      }
+      return pagesArray;
+    }
+  }, {
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      this.fetchUsers(this.state.meta.current_page);
+    }
+  }, {
+    key: 'tableHeads',
+    value: function tableHeads() {
+      var _this3 = this;
+
+      var icon = void 0;
+      if (this.state.order === 'asc') {
+        icon = __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('i', { className: 'fas fa-arrow-up' });
+      } else {
+        icon = __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('i', { className: 'fas fa-arrow-down' });
+      }
+      return this.state.columns.map(function (column) {
+        return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+          'th',
+          { className: 'table-head', key: column, onClick: function onClick() {
+              return _this3.sortByColumn(column);
+            } },
+          column,
+          column === _this3.state.sorted_column && icon
+        );
       });
     }
   }, {
@@ -36234,51 +36302,109 @@ var DataTable = function (_Component) {
       });
     }
   }, {
+    key: 'sortByColumn',
+    value: function sortByColumn(column) {
+      if (column === this.state.sorted_column) {
+        this.state.order = this.state.order === 'asc' ? 'desc' : 'asc';
+      } else {
+        this.setState({ sorted_column: column, order: 'asc' });
+      }
+      this.fetchUsers(1);
+    }
+  }, {
+    key: 'pageList',
+    value: function pageList() {
+      var _this4 = this;
+
+      return this.pagesNumbers().map(function (page) {
+        return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+          'li',
+          { className: 'page-item', key: page },
+          __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+            'button',
+            { className: 'page-link', onClick: function onClick() {
+                return _this4.changePage(page);
+              } },
+            page
+          )
+        );
+      });
+    }
+  }, {
     key: 'render',
     value: function render() {
+      var _this5 = this;
+
       return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
         'div',
         { className: 'data-table' },
         __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
           'table',
-          { className: 'table' },
+          { className: 'table table-bordered' },
           __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
             'thead',
             null,
             __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
               'tr',
               null,
-              __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                'th',
-                { className: 'table-head' },
-                '#'
-              ),
-              __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                'th',
-                { className: 'table-head' },
-                'Name'
-              ),
-              __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                'th',
-                { className: 'table-head' },
-                'Email'
-              ),
-              __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                'th',
-                { className: 'table-head' },
-                'Address'
-              ),
-              __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                'th',
-                { className: 'table-head' },
-                'Created At'
-              )
+              this.tableHeads()
             )
           ),
           __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
             'tbody',
             null,
             this.userList()
+          )
+        ),
+        this.state.users && this.state.users.length > 0 && __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+          'nav',
+          null,
+          __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+            'ul',
+            { className: 'pagination' },
+            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+              'li',
+              { className: 'page-item' },
+              __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                'button',
+                { className: 'page-link',
+                  disabled: 1 === this.state.meta.current_page,
+                  onClick: function onClick() {
+                    return _this5.changePage(_this5.state.meta.current_page - 1);
+                  }
+                },
+                'Previous'
+              )
+            ),
+            this.pageList(),
+            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+              'li',
+              { className: 'page-item' },
+              __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                'button',
+                { className: 'page-link',
+                  disabled: this.state.meta.last_page === this.state.meta.current_page,
+                  onClick: function onClick() {
+                    return _this5.changePage(_this5.state.meta.current_page + 1);
+                  }
+                },
+                'Next'
+              )
+            ),
+            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+              'span',
+              { style: { marginTop: '8px' } },
+              ' \xA0 ',
+              __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                'i',
+                null,
+                'Displaying ',
+                this.state.users.length,
+                ' of ',
+                this.state.meta.total,
+                ' entries.'
+              )
+            )
           )
         )
       );

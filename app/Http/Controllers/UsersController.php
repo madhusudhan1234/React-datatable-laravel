@@ -31,11 +31,13 @@ class UsersController extends Controller
     /**
      * List of users in Json format
      *
+     * @param Request $request
      * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
-    public function index()
+    public function index(Request $request)
     {
-        $users = $this->user->all();
+        $query = $this->user->orderBy($request->column ?? 'name', $request->order);
+        $users = $query->paginate($request->per_page ?? 5);
 
         return UsersResource::collection($users);
     }
