@@ -36334,7 +36334,7 @@ var DataTable = function (_Component) {
       return this.pagesNumbers().map(function (page) {
         return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
           'li',
-          { className: 'page-item', key: page },
+          { className: page === _this7.state.meta.current_page ? 'page-item active' : 'page-item', key: page },
           __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
             'button',
             { className: 'page-link', onClick: function onClick() {
