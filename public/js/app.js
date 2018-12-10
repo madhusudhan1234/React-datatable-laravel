@@ -36182,14 +36182,16 @@ var DataTable = function (_Component) {
     var _this = _possibleConstructorReturn(this, (DataTable.__proto__ || Object.getPrototypeOf(DataTable)).call(this, props));
 
     _this.state = {
-      users: [],
-      meta: {
-        current_page: 1,
-        from: 1,
-        last_page: 1,
-        per_page: 5,
-        to: 1,
-        total: 1
+      users: {
+        data: [],
+        meta: {
+          current_page: 1,
+          from: 1,
+          last_page: 1,
+          per_page: 5,
+          to: 1,
+          total: 1
+        }
       },
       first_page: 1,
       current_page: 1,
@@ -36206,12 +36208,13 @@ var DataTable = function (_Component) {
     value: function fetchUsers() {
       var _this2 = this;
 
-      var fetchUrl = '/api/users/?page=' + this.state.current_page + '&column=' + this.state.sorted_column + '&order=' + this.state.order + '&per_page=' + this.state.meta.per_page;
+      var fetchUrl = '/api/users/?page=' + this.state.current_page + '&column=' + this.state.sorted_column + '&order=' + this.state.order + '&per_page=' + this.state.users.meta.per_page;
       fetch(fetchUrl).then(function (response) {
         return response.json();
       }).then(function (data) {
-        _this2.setState({ users: data.data });
-        _this2.setState({ meta: data.meta });
+        _this2.setState({ users: data });
+      }).catch(function (e) {
+        console.error(e);
       });
     }
   }, {
@@ -36226,16 +36229,16 @@ var DataTable = function (_Component) {
   }, {
     key: 'pagesNumbers',
     value: function pagesNumbers() {
-      if (!this.state.meta.to) {
+      if (!this.state.users.meta.to) {
         return [];
       }
-      var from = this.state.meta.current_page - this.state.offset;
+      var from = this.state.users.meta.current_page - this.state.offset;
       if (from < 1) {
         from = 1;
       }
       var to = from + this.state.offset * 2;
-      if (to >= this.state.meta.last_page) {
-        to = this.state.meta.last_page;
+      if (to >= this.state.users.meta.last_page) {
+        to = this.state.users.meta.last_page;
       }
       var pagesArray = [];
       for (var page = from; page <= to; page++) {
@@ -36248,7 +36251,7 @@ var DataTable = function (_Component) {
     value: function componentDidMount() {
       var _this4 = this;
 
-      this.setState({ current_page: this.state.meta.current_page }, function () {
+      this.setState({ current_page: this.state.users.meta.current_page }, function () {
         _this4.fetchUsers();
       });
     }
@@ -36277,37 +36280,49 @@ var DataTable = function (_Component) {
   }, {
     key: 'userList',
     value: function userList() {
-      return this.state.users.map(function (user) {
+      if (this.state.users.data.length) {
+        return this.state.users.data.map(function (user) {
+          return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+            'tr',
+            { key: user.id },
+            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+              'td',
+              null,
+              user.id
+            ),
+            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+              'td',
+              null,
+              user.name
+            ),
+            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+              'td',
+              null,
+              user.email
+            ),
+            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+              'td',
+              null,
+              user.address
+            ),
+            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+              'td',
+              null,
+              user.created_at
+            )
+          );
+        });
+      } else {
         return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
           'tr',
-          { key: user.id },
+          null,
           __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
             'td',
-            null,
-            user.id
-          ),
-          __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-            'td',
-            null,
-            user.name
-          ),
-          __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-            'td',
-            null,
-            user.email
-          ),
-          __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-            'td',
-            null,
-            user.address
-          ),
-          __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-            'td',
-            null,
-            user.created_at
+            { colSpan: this.state.columns.length, className: 'text-center' },
+            'No Records Found.'
           )
         );
-      });
+      }
     }
   }, {
     key: 'sortByColumn',
@@ -36334,7 +36349,7 @@ var DataTable = function (_Component) {
       return this.pagesNumbers().map(function (page) {
         return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
           'li',
-          { className: page === _this7.state.meta.current_page ? 'page-item active' : 'page-item', key: page },
+          { className: page === _this7.state.users.meta.current_page ? 'page-item active' : 'page-item', key: page },
           __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
             'button',
             { className: 'page-link', onClick: function onClick() {
@@ -36371,7 +36386,7 @@ var DataTable = function (_Component) {
             this.userList()
           )
         ),
-        this.state.users && this.state.users.length > 0 && __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+        this.state.users.data && this.state.users.data.length > 0 && __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
           'nav',
           null,
           __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
@@ -36383,9 +36398,9 @@ var DataTable = function (_Component) {
               __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                 'button',
                 { className: 'page-link',
-                  disabled: 1 === this.state.meta.current_page,
+                  disabled: 1 === this.state.users.meta.current_page,
                   onClick: function onClick() {
-                    return _this8.changePage(_this8.state.meta.current_page - 1);
+                    return _this8.changePage(_this8.state.users.meta.current_page - 1);
                   }
                 },
                 'Previous'
@@ -36398,9 +36413,9 @@ var DataTable = function (_Component) {
               __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                 'button',
                 { className: 'page-link',
-                  disabled: this.state.meta.last_page === this.state.meta.current_page,
+                  disabled: this.state.users.meta.last_page === this.state.users.meta.current_page,
                   onClick: function onClick() {
-                    return _this8.changePage(_this8.state.meta.current_page + 1);
+                    return _this8.changePage(_this8.state.users.meta.current_page + 1);
                   }
                 },
                 'Next'
@@ -36414,9 +36429,9 @@ var DataTable = function (_Component) {
                 'i',
                 null,
                 'Displaying ',
-                this.state.users.length,
+                this.state.users.data.length,
                 ' of ',
-                this.state.meta.total,
+                this.state.users.meta.total,
                 ' entries.'
               )
             )
