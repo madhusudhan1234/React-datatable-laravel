@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
 
 export default class DataTable extends Component {
   constructor(props) {
@@ -22,12 +21,11 @@ export default class DataTable extends Component {
       sorted_column: 'name',
       offset: 4,
       order: 'asc',
-      columns: ['id', 'name', 'email', 'address', 'created_at'],
     }
   }
 
   fetchUsers() {
-    let fetchUrl = `/api/users/?page=${this.state.current_page}&column=${this.state.sorted_column}&order=${this.state.order}&per_page=${this.state.users.meta.per_page}`;
+    let fetchUrl = `${this.props.url}/?page=${this.state.current_page}&column=${this.state.sorted_column}&order=${this.state.order}&per_page=${this.state.users.meta.per_page}`;
     fetch(fetchUrl)
       .then(response => {
         return response.json();
@@ -74,7 +72,7 @@ export default class DataTable extends Component {
     } else {
       icon = <i className="fas fa-arrow-down"></i>;
     }
-    return this.state.columns.map(column => {
+    return this.props.columns.map(column => {
       return <th className="table-head" key={column} onClick={() => this.sortByColumn(column)}>
         { column }
         { column === this.state.sorted_column && icon }
@@ -86,16 +84,12 @@ export default class DataTable extends Component {
     if (this.state.users.data.length) {
       return this.state.users.data.map(user => {
         return <tr key={ user.id }>
-          <td>{ user.id }</td>
-          <td>{ user.name }</td>
-          <td>{ user.email }</td>
-          <td>{ user.address }</td>
-          <td>{ user.created_at }</td>
+          {Object.keys(user).map(key => <td key={key}>{ user[key] }</td>)}
         </tr>
       })
     } else {
       return <tr>
-        <td colSpan={this.state.columns.length} className="text-center">No Records Found.</td>
+        <td colSpan={this.props.columns.length} className="text-center">No Records Found.</td>
       </tr>
     }
   }
@@ -152,8 +146,4 @@ export default class DataTable extends Component {
       </div>
     );
   }
-}
-
-if (document.getElementById('datatable')) {
-  ReactDOM.render(<DataTable />, document.getElementById('datatable'));
 }
