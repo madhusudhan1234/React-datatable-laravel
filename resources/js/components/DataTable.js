@@ -22,6 +22,8 @@ export default class DataTable extends Component {
       offset: 4,
       order: 'asc',
     }
+
+    this.columnHead = this.columnHead.bind(this);
   }
 
   fetchUsers() {
@@ -40,6 +42,11 @@ export default class DataTable extends Component {
 
   changePage(pageNumber) {
     this.setState({ current_page: pageNumber }, () => {this.fetchUsers()});
+  }
+
+  columnHead(value) {
+    console.log(value);
+    return value.split('_').join(' ').toUpperCase()
   }
 
   pagesNumbers() {
@@ -74,7 +81,7 @@ export default class DataTable extends Component {
     }
     return this.props.columns.map(column => {
       return <th className="table-head" key={column} onClick={() => this.sortByColumn(column)}>
-        { column }
+        { this.columnHead(column) }
         { column === this.state.sorted_column && icon }
       </th>
     });
