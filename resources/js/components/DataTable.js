@@ -21,19 +21,16 @@ export default class DataTable extends Component {
       sorted_column: 'name',
       offset: 4,
       order: 'asc',
-    }
+    };
 
     this.columnHead = this.columnHead.bind(this);
   }
 
   fetchUsers() {
     let fetchUrl = `${this.props.url}/?page=${this.state.current_page}&column=${this.state.sorted_column}&order=${this.state.order}&per_page=${this.state.users.meta.per_page}`;
-    fetch(fetchUrl)
+    axios.get(fetchUrl)
       .then(response => {
-        return response.json();
-      })
-      .then(data => {
-        this.setState({ users: data });
+          this.setState({ users: response.data });
       })
       .catch(e => {
         console.error(e);
@@ -45,7 +42,6 @@ export default class DataTable extends Component {
   }
 
   columnHead(value) {
-    console.log(value);
     return value.split('_').join(' ').toUpperCase()
   }
 

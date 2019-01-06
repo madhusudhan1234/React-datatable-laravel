@@ -19,5 +19,8 @@
         "popper.js": "^1.12",
         "react": "^16.2.0",
         "react-dom": "^16.2.0"
+    },
+    "dependencies": {
+        "axios": "^0.18.0"
     }
 }
